@@ -35,7 +35,7 @@ uint32_t rc_crc32(uint32_t crc, const char* buf, size_t len, size_t word_loc) {
     crc = ~crc;
     for(size_t i = 0; i < len; ++i) {
         if ((i >= (word_loc+4))||(i < word_loc)) {
-            octet = (uint8_t)(buf+i);
+            octet = *((uint8_t*)(buf+i));
         } else {
             octet = 0;
         }
@@ -60,5 +60,30 @@ int main(int argc, char** argv) {
         return 1;
     }
     
+    // Open the input file for reading.
+    FILE* infile = fopen(input_filepath.c_str(), "r");
+    if(infile == NULL) {
+        std::cerr << "There was a problem opening the file to be read!" << std::endl;
+    }
+
+    // Read header info.
+    const size_t buf_size = 1024;
+    char buf[buf_size];
+    if(fread(buf, buf_size, 1, infile) == 0) {
+        std::cerr << "There was a problem reading the input file!" << std::endl;
+        fclose(infile);
+        return 1;
+    }
+
+    // Check that this is a microsoft binary
+    if((buf[0] != 'M')||(buf[1] != 'Z')) {
+        std::cerr << "This is not a valid microsoft binary!" << std::endl;
+        fclose(infile);
+        return 1;
+    }
+
+    uint32_t new_header_location = *((uint32_t*)(buf+0x3c));
+    std::cout << "New header location: " << new_header_location << std::endl;
+
     return 0;
 }
