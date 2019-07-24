@@ -123,23 +123,37 @@ int main(int argc, char** argv) {
 
     uint32_t crc_location = new_header_location+0x8;
 
-    uint32_t gen_1 = 0xEDB88320;
-    uint32_t gen_2 = 0x82F63B78;
-    uint32_t gen_3 = 0xEB31D82E;
-    uint32_t gen_4 = 0x992C1A4C;
-    uint32_t gen_5 = 0xD5828281;
+    uint32_t gen_1_norm = 0x04C11DB7;
+    uint32_t gen_1_rev = 0xEDB88320;
+    uint32_t gen_2_norm = 0x1EDC6F41;
+    uint32_t gen_2_rev = 0x82F63B78;
+    uint32_t gen_3_norm = 0x741B8CD7;
+    uint32_t gen_3_rev = 0xEB31D82E;
+    uint32_t gen_4_norm = 0x32583499;
+    uint32_t gen_4_rev = 0x992C1A4C;
+    uint32_t gen_5_norm = 0x814141AB;
+    uint32_t gen_5_rev = 0xD5828281;
 
-    uint32_t new_crc_1 = rc_crc32(infile, buf, crc_location, gen_1);
-    std::cout << "Generator: " << std::hex << gen_1 << " -> " << new_crc_1 << std::endl;
-    uint32_t new_crc_2 = rc_crc32(infile, buf, crc_location, gen_2);
-    std::cout << "Generator: " << std::hex << gen_2 << " -> " << new_crc_2 << std::endl;
-    uint32_t new_crc_3 = rc_crc32(infile, buf, crc_location, gen_3);
-    std::cout << "Generator: " << std::hex << gen_3 << " -> " << new_crc_3 << std::endl;
-    uint32_t new_crc_4 = rc_crc32(infile, buf, crc_location, gen_4);
-    std::cout << "Generator: " << std::hex << gen_4 << " -> " << new_crc_4 << std::endl;
-    uint32_t new_crc_5 = rc_crc32(infile, buf, crc_location, gen_5);
-    std::cout << "Generator: " << std::hex << gen_5 << " -> " << new_crc_5 << std::endl;
-
+    uint32_t new_crc_1_norm = rc_crc32(infile, buf, crc_location, gen_1_norm);
+    std::cout << "Generator: " << std::hex << gen_1_norm << " -> " << new_crc_1_norm << std::endl;
+    uint32_t new_crc_1_rev = rc_crc32(infile, buf, crc_location, gen_1_rev);
+    std::cout << "Generator: " << std::hex << gen_1_rev << " -> " << new_crc_1_rev << std::endl;
+    uint32_t new_crc_2_norm = rc_crc32(infile, buf, crc_location, gen_2_norm);
+    std::cout << "Generator: " << std::hex << gen_2_norm << " -> " << new_crc_2_norm << std::endl;
+    uint32_t new_crc_2_rev = rc_crc32(infile, buf, crc_location, gen_2_rev);
+    std::cout << "Generator: " << std::hex << gen_2_rev << " -> " << new_crc_2_rev << std::endl;
+    uint32_t new_crc_3_norm = rc_crc32(infile, buf, crc_location, gen_3_norm);
+    std::cout << "Generator: " << std::hex << gen_3_norm << " -> " << new_crc_3_norm << std::endl;
+    uint32_t new_crc_3_rev = rc_crc32(infile, buf, crc_location, gen_3_rev);
+    std::cout << "Generator: " << std::hex << gen_3_rev << " -> " << new_crc_3_rev << std::endl;
+    uint32_t new_crc_4_norm = rc_crc32(infile, buf, crc_location, gen_4_norm);
+    std::cout << "Generator: " << std::hex << gen_4_norm << " -> " << new_crc_4_norm << std::endl;
+    uint32_t new_crc_4_rev = rc_crc32(infile, buf, crc_location, gen_4_rev);
+    std::cout << "Generator: " << std::hex << gen_4_rev << " -> " << new_crc_4_rev << std::endl;
+    uint32_t new_crc_5_norm = rc_crc32(infile, buf, crc_location, gen_5_norm);
+    std::cout << "Generator: " << std::hex << gen_5_norm << " -> " << new_crc_5_norm << std::endl;
+    uint32_t new_crc_5_rev = rc_crc32(infile, buf, crc_location, gen_5_rev);
+    std::cout << "Generator: " << std::hex << gen_5_rev << " -> " << new_crc_5_rev << std::endl;
 
     fclose(infile);
     return 0;
