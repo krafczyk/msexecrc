@@ -45,6 +45,7 @@ uint32_t rc_crc32(FILE* the_file, char* buf, size_t word_loc, uint32_t generator
             if (((i+buff_base) >= (word_loc+4))||((i+buff_base) < word_loc)) {
                 octet = *((uint8_t*)(buf+i));
             } else {
+                std::cout << "Overriding byte " << std::hex << (i+buff_base) << " = " << (uint16_t)(*((uint8_t*)(buf+i))) << std::endl;
                 octet = 0;
             }
             crc = (crc >> 8) ^ table[(crc & 0xff) ^ octet];
