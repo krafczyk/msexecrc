@@ -5,10 +5,10 @@
 #include <cstdint>
 
 // CRC32 implementation from: https://rosettacode.org/wiki/CRC-32#C 
+#define GENERATOR 0xEDB88320
+#define BUFFER_SIZE 1024
 
-static const uint32_t generator = 0xEDB88320;
-
-uint32_t rc_crc32(uint32_t crc, const char* buf, size_t len, size_t word_loc) {
+uint32_t rc_crc32(FILE* the_file, char* buf, size_t word_loc, uint32_t generator) {
     static uint32_t table[256];
     static bool have_table = false;
     uint32_t rem = 0;
@@ -32,15 +32,37 @@ uint32_t rc_crc32(uint32_t crc, const char* buf, size_t len, size_t word_loc) {
         have_table = true;
     }
 
-    crc = ~crc;
-    for(size_t i = 0; i < len; ++i) {
-        if ((i >= (word_loc+4))||(i < word_loc)) {
-            octet = *((uint8_t*)(buf+i));
-        } else {
-            octet = 0;
-        }
-        crc = (crc >> 8) ^ table[(crc & 0xff) ^ octet];
+    // Seek to beginning of file.
+    if(fseek(the_file, 0, SEEK_SET) != 0) {
+        std::cerr << "There was a problem seeking to the beginning!" << std::endl;
+        return 0;
     }
+
+    size_t num_bytes = 0;
+    size_t buff_base = 0;
+    uint32_t crc = 0;
+    crc = ~crc;
+    while(true) {
+        // Read the next BUFFER_SIZE worth of bytes
+        num_bytes = fread(buf, 1, BUFFER_SIZE, the_file);
+
+        for(size_t i = 0; i < num_bytes; ++i) {
+            if (((i+buff_base) >= (word_loc+4))||((i+buff_base) < word_loc)) {
+                octet = *((uint8_t*)(buf+i));
+            } else {
+                octet = 0;
+            }
+            crc = (crc >> 8) ^ table[(crc & 0xff) ^ octet];
+        }
+
+        buff_base += num_bytes;
+
+        if(feof(the_file) != 0) {
+            // at end of file
+            break;
+        }
+    }
+
     return ~crc;
 }
 
@@ -67,9 +89,8 @@ int main(int argc, char** argv) {
     }
 
     // Read header info.
-    const size_t buf_size = 1024;
-    char buf[buf_size];
-    if(fread(buf, buf_size, 1, infile) == 0) {
+    char buf[BUFFER_SIZE];
+    if(fread(buf, 1, BUFFER_SIZE, infile) == 0) {
         std::cerr << "There was a problem reading the input file!" << std::endl;
         fclose(infile);
         return 1;
@@ -83,7 +104,33 @@ int main(int argc, char** argv) {
     }
 
     uint32_t new_header_location = *((uint32_t*)(buf+0x3c));
-    std::cout << "New header location: " << new_header_location << std::endl;
 
+    // Seek to new header location file
+    if(fseek(infile, new_header_location, SEEK_SET) != 0) {
+        std::cerr << "Couldn't seek to new header location!" << std::endl;
+        fclose(infile);
+        return 1;
+    } 
+    // Read new buffer data
+    if(fread(buf, 1, BUFFER_SIZE, infile) == 0) {
+        std::cerr << "There was a problem reading the input file!" << std::endl;
+        fclose(infile);
+        return 1;
+    }
+
+    // Check that we have an NE binary
+    if((buf[0] != 'N')||(buf[1] != 'E')) {
+        std::cerr << "This is not an NE binary!" << std::endl;
+        fclose(infile);
+        return 1;
+    }
+
+    uint32_t crc_location = new_header_location+0x8;
+
+    uint32_t new_crc = rc_crc32(infile, buf, crc_location, GENERATOR);
+
+    std::cout << std::hex << new_crc << std::endl;
+
+    fclose(infile);
     return 0;
 }
