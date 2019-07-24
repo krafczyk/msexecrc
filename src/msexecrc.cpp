@@ -5,31 +5,26 @@
 #include <cstdint>
 
 // CRC32 implementation from: https://rosettacode.org/wiki/CRC-32#C 
-#define GENERATOR 0xEDB88320
 #define BUFFER_SIZE 1024
 
 uint32_t rc_crc32(FILE* the_file, char* buf, size_t word_loc, uint32_t generator) {
-    static uint32_t table[256];
-    static bool have_table = false;
+    uint32_t table[256];
+    //static bool have_table = false;
     uint32_t rem = 0;
     uint8_t octet = 0;
 
-    /* This check is not thread safe; there is no mutex. */
-    if(have_table == false) {
-        /* Calculate CRC table. */
-        for(int i = 0; i < 256; i++) {
-            rem = i; /* remainder from polynomial division */
-            for(int j = 0; j < 8; ++j) {
-                if(rem & 1) {
-                    rem >>= 1;
-                    rem ^= generator;
-                } else {
-                    rem >>= 1;
-                }
+    /* Calculate CRC table. */
+    for(int i = 0; i < 256; i++) {
+        rem = i; /* remainder from polynomial division */
+        for(int j = 0; j < 8; ++j) {
+            if(rem & 1) {
+                rem >>= 1;
+                rem ^= generator;
+            } else {
+                rem >>= 1;
             }
-            table[i] = rem;
         }
-        have_table = true;
+        table[i] = rem;
     }
 
     // Seek to beginning of file.
@@ -127,9 +122,23 @@ int main(int argc, char** argv) {
 
     uint32_t crc_location = new_header_location+0x8;
 
-    uint32_t new_crc = rc_crc32(infile, buf, crc_location, GENERATOR);
+    uint32_t gen_1 = 0xEDB88320;
+    uint32_t gen_2 = 0x82F63B78;
+    uint32_t gen_3 = 0xEB31D82E;
+    uint32_t gen_4 = 0x992C1A4C;
+    uint32_t gen_5 = 0xD5828281;
 
-    std::cout << std::hex << new_crc << std::endl;
+    uint32_t new_crc_1 = rc_crc32(infile, buf, crc_location, gen_1);
+    std::cout << "Generator: " << std::hex << gen_1 << " -> " << new_crc_1 << std::endl;
+    uint32_t new_crc_2 = rc_crc32(infile, buf, crc_location, gen_2);
+    std::cout << "Generator: " << std::hex << gen_2 << " -> " << new_crc_2 << std::endl;
+    uint32_t new_crc_3 = rc_crc32(infile, buf, crc_location, gen_3);
+    std::cout << "Generator: " << std::hex << gen_3 << " -> " << new_crc_3 << std::endl;
+    uint32_t new_crc_4 = rc_crc32(infile, buf, crc_location, gen_4);
+    std::cout << "Generator: " << std::hex << gen_4 << " -> " << new_crc_4 << std::endl;
+    uint32_t new_crc_5 = rc_crc32(infile, buf, crc_location, gen_5);
+    std::cout << "Generator: " << std::hex << gen_5 << " -> " << new_crc_5 << std::endl;
+
 
     fclose(infile);
     return 0;
